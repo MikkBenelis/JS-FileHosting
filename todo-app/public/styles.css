@@ -1,0 +1,127 @@
+html * {
+	box-sizing: border-box;
+	font-family: Verdana;
+	cursor: default;
+	border: none;
+	padding: 0;
+	margin: 0;
+}
+
+body {
+	background: #FDFDFD;
+}
+
+.container {
+	width: 600px;
+	margin: 100px auto;
+	border-radius: 15px;
+	box-shadow: 0 3px 10px #CCC;
+	overflow: hidden;
+}
+
+.title {
+	padding: 15px;
+	font-size: 25px;
+	text-align: center;
+	background: #F0F0F0;
+	color: #555555;
+}
+
+.form {
+	background: #F0F0F0;
+}
+
+.newTaskArea {
+	
+}
+
+.newTaskText {
+	font-size: 15px;
+	cursor: text;
+	border: 1px solid #C5C5C5;
+	background: #FFFFFF;
+	color: #A5A5A5;
+	margin: 10px;
+	padding: 5px;
+	width: 450px;
+	height: 35px;
+}
+
+.newTaskFile {
+	font-size: 15px;
+	cursor: pointer;
+	border: 1px solid #C5C5C5;
+	background: #FFFFFF;
+	color: #A5A5A5;
+	padding: 5px;
+}
+
+.newTaskAddButton {
+	padding: 5px;
+	font-size: 15px;
+	color: white;
+	background: #55AA55;
+	cursor: pointer;
+	transition: 0.3s;
+}
+
+.newTaskAddButton:hover {
+	box-shadow: 0 0 5px #5A5A5A;
+	border-radius: 5px;
+}
+
+.taskList,
+.completedTasksList {
+	list-style: none;
+	text-align: center;
+}
+
+.taskListItem {
+	background: #FFFFFF;
+	border-bottom: 3px solid #F0F0F0;
+	padding: 5px;
+	font-size: 25px;
+	line-height: 25px;
+	cursor: pointer;
+}
+
+.taskListItem:last-child {
+	border-bottom: none;
+}
+
+.taskCheckbox {
+	cursor: pointer;
+	float: left;
+	width: 25px;
+	height: 25px;
+}
+
+.checkTaskButton,
+.removeTaskButton {
+	padding: 5px;
+	font-size: 15px;
+	color: white;
+	background: #55AA55;
+	cursor: pointer;
+	transition: 0.3s;
+	margin: 10px;
+}
+
+.checkTaskButton {
+	float: right;
+}
+
+.checkTaskButton:hover,
+.removeTaskButton:hover {
+	box-shadow: 0 0 5px #5A5A5A;
+	border-radius: 5px;
+}
+
+.completedTasksTitle {
+	padding: 15px;
+	font-size: 25px;
+	text-align: center;
+	background: #F0F0F0;
+	color: #555555;
+	border-top: 5px solid #ACACAC;
+}
