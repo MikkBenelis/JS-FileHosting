@@ -8,10 +8,10 @@
 	//////////////////////////////////////////////////
 
 	const express = require("express");
-	const bodyParser = require("body-parser");
 	const multer = require("multer");
 	const path = require("path");
 	const fs = require("fs");
+	const jwt = require("jsonwebtoken");
 
 	const upload = multer({ dest : 'uploads' });
 
@@ -24,14 +24,12 @@
 	const appName = "JS FILE HOSTING";
 	const indexFile = path.join(__dirname, "app.html");
 	const publicDir = path.join(__dirname, 'public');
-	const viewsDir = path.join(__dirname, "views");
 	const uploadsDir = path.join(__dirname, "uploads");
 
 	const app = express();
 	const appPort = 3000;
 
 	app.use(express.static(publicDir));
-	app.use(bodyParser.json());
 
 	app.listen(appPort, () => {
 		console.log(`[${appName}] Application started!`);
@@ -47,17 +45,6 @@
 	// Index
 	app.get("/", (req, res, next) => {
 		res.sendFile(indexFile);
-	});
-
-	// Views
-	app.get("/views/:view", (req, res, next) => {
-		const viewName = `${req.params['view']}.html`;
-		const viewFilePath = path.join(viewsDir, viewName);
-		if (!fs.existsSync(viewFilePath)) {
-			res.sendStatus(404);
-			return;
-		}
-		res.sendFile(viewFilePath);
 	});
 
 	// Upload files

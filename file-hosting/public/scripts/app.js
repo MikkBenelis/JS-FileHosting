@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const hash = window.location.hash;
         if (hash && hash.substr(1).length > 0)
             view = hash.substr(1);
-        const url = `views/${view}`;
+        const url = `views/${view}.html`;
         const xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
             if (this.readyState === 4) {
@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function uploadFiles() {
     let req = new XMLHttpRequest();
     let formData = new FormData();
-    const files = document.getElementById("files-upload").files;
+    const files = document.getElementById("files-to-upload").files;
     for (let i = 0; i < files.length; i++)
         formData.append("files", files[i]);
     req.open("POST", 'upload');
