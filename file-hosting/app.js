@@ -1,141 +1,247 @@
-'use strict';
+"use strict";
 
 // Main module
 (function () {
 
-	//////////////////////////////////////////////////
-	// IMPORTS
-	//////////////////////////////////////////////////
+    //////////////////////////////////////////////////
+    // IMPORTS
+    //////////////////////////////////////////////////
 
-	const express = require("express");
-	const multer = require("multer");
-	const path = require("path");
-	const fs = require("fs");
-	const jwt = require("jsonwebtoken");
+    const jwt = require("jsonwebtoken");
+    const express = require("express");
+    const multer = require("multer");
+    const path = require("path");
+    const fs = require("fs");
 
-	const upload = multer({ dest : 'uploads' });
-
-
-
-	//////////////////////////////////////////////////
-	// APP SETTINGS
-	//////////////////////////////////////////////////
-
-	const appName = "JS FILE HOSTING";
-	const indexFile = path.join(__dirname, "app.html");
-	const publicDir = path.join(__dirname, 'public');
-	const uploadsDir = path.join(__dirname, "uploads");
-
-	const app = express();
-	const appPort = 3000;
-
-	app.use(express.static(publicDir));
-
-	app.listen(appPort, () => {
-		console.log(`[${appName}] Application started!`);
-		console.log(`[${appName}] Running on ${appPort} port`);
-	});
+    const upload = multer({ dest : "uploads" });
 
 
 
-	//////////////////////////////////////////////////
-	// ROUTE HANDLERS
-	//////////////////////////////////////////////////
+    //////////////////////////////////////////////////
+    // APP SETTINGS
+    //////////////////////////////////////////////////
 
-	// Index
-	app.get("/", (req, res, next) => {
-		res.sendFile(indexFile);
-	});
+    const appName = "JS FILE HOSTING";
+    const jwtSecretKey = "secret_key";
+    const indexFile = path.join(__dirname, "app.html");
+    const publicDir = path.join(__dirname, 'public');
+    const uploadsDir = path.join(__dirname, "uploads");
 
-	// Upload files
-	app.post("/upload", upload.array("files"), (req, res, next) => {
-		let partial = false;
-		if (req.files) {
-			req.files.forEach((f) => {
-				const fname = path.join(uploadsDir, f.filename);
-				const oname = path.join(uploadsDir, f.originalname);
-				if (fs.existsSync(oname)) {
-					fs.unlinkSync(fname);
-					partial = true;
-					return;
-				}
-				fs.renameSync(fname, oname);
-			});
-		}
-		res.sendStatus(partial ? 206 : 201);
-	});
+    const app = express();
+    const appPort = 3000;
 
-	// Update files
-	app.put("/update", upload.array("files"), (req, res, next) => {
-		let partial = false;
-		if (req.files) {
-			req.files.forEach((f) => {
-				const fname = path.join(uploadsDir, f.filename);
-				const oname = path.join(uploadsDir, f.originalname);
-				if (!fs.existsSync(oname)) {
-					fs.unlinkSync(fname);
-					partial = true;
-					return;
-				}
-				fs.renameSync(fname, oname);
-			});
-		}
-		res.sendStatus(partial ? 206 : 201);
-	});
+    app.use(express.static(publicDir));
 
-	// Download file
-	app.get("/download/:filename", (req, res, next) => {
-		const fileName = req.params['filename'];
-		const filePath = path.join(uploadsDir, fileName);
-		if (!fs.existsSync(filePath)) {
-			res.sendStatus(404);
-			return;
-		}
-		res.sendFile(filePath);
-	});
+    app.listen(appPort, () => {
+        console.log(`[${appName}] Application started!`);
+        console.log(`[${appName}] Running on ${appPort} port`);
+    });
 
-	// Delete file
-	app.delete("/delete/:filename", (req, res, next) => {
-		const fileName = req.params['filename'];
-		const filePath = path.join(uploadsDir, fileName);
-		if (!fs.existsSync(filePath)) {
-			res.sendStatus(404);
-			return;
-		}
-		fs.unlinkSync(filePath);
-		res.sendStatus(202);
-	});
 
-	// Get file size
-	app.get("/size/:filename", (req, res, next) => {
-		const fileName = req.params['filename'];
-		const filePath = path.join(uploadsDir, fileName);
-		if (!fs.existsSync(filePath)) {
-			res.sendStatus(404);
-			return;
-		}
-		const stats = fs.statSync(filePath);
-		res.json(stats.size);
-	});
 
-	// Get whole files list
-	app.get("/list", (req, res, next) => {
-		const filesList = fs.readdirSync(uploadsDir);
-		res.json(filesList);
-	});
+    //////////////////////////////////////////////////
+    // AUTHENTICATION HANDLERS
+    //////////////////////////////////////////////////
 
-	// Get files list with given ext
-	app.get("/list/ext/:ext?", (req, res, next) => {
-		const ext = req.params['ext'];
-		const filesList = fs.readdirSync(uploadsDir);
-		res.json(filesList.filter(x => !ext ? x : x.endsWith(ext)));
-	});
+    app.get("/api/auth", verifyToken, (req, res, next) => {
+        jwt.verify(req.token, jwtSecretKey, (err, authData) => {
+            if (err) {
+                res.sendStatus(403);
+            } else {
+                res.sendStatus(200);
+            }
+        });
+    });
 
-	// Get files list with given ext
-	app.get("/list/filter/:filter?", (req, res, next) => {
-		const filter = req.params['filter'];
-		const filesList = fs.readdirSync(uploadsDir);
-		res.json(filesList.filter(x => !filter ? x : x.includes(filter)));
-	});
+    app.post("/api/login", upload.none(), (req, res, next) => {
+
+        const user = {
+            username : "mikk",
+            login : "mikk",
+            password : "pass"
+        }
+
+        const reqLogin = req.body["login"];
+        const reqPassword = req.body["password"];
+        
+        if (reqLogin === user.username && reqPassword === user.password) {
+            jwt.sign({ user : user}, jwtSecretKey, { expiresIn : '360s'}, (err, token) => {
+                res.cookie("Authorization", token, { httpOnly : true });
+                res.json({ token : token });
+            });
+        } else {
+            res.sendStatus(403);
+        }
+
+    });
+
+    app.post("/api/logout", (req, res, next) => {
+        res.cookie("Authorization", "", { httpOnly : true });
+        res.sendStatus(200);
+    });
+
+    function verifyToken(req, res, next) {
+        const authCookieName = "Authorization";
+        const cookieIndex = authCookieName.length + 1;
+        const authHeader = req.headers["cookie"].substring(cookieIndex);
+        if (typeof(authHeader) !== "undefined") {
+            req.token = authHeader;
+            next();
+        } else {
+            res.sendStatus(403);
+        }
+    }
+
+
+
+    //////////////////////////////////////////////////
+    // ROUTE HANDLERS
+    //////////////////////////////////////////////////
+
+    // Index
+    app.get("/", (req, res, next) => {
+        res.sendFile(indexFile);
+    });
+
+    // Upload files
+    app.post("/api/upload", upload.array("files"), verifyToken, (req, res, next) => {
+        jwt.verify(req.token, jwtSecretKey, (err, authData) => {
+            if (err) {
+                res.sendStatus(403);
+            } else {
+                let partial = false;
+                if (req.files) {
+                    req.files.forEach((f) => {
+                        const fname = path.join(uploadsDir, f.filename);
+                        const oname = path.join(uploadsDir, f.originalname);
+                        if (fs.existsSync(oname)) {
+                            fs.unlinkSync(fname);
+                            partial = true;
+                            return;
+                        }
+                        fs.renameSync(fname, oname);
+                    });
+                }
+                res.sendStatus(partial ? 206 : 201);
+            }
+        });
+    });
+
+    // Update files
+    app.put("/api/update", upload.array("files"), verifyToken, (req, res, next) => {
+        jwt.verify(req.token, jwtSecretKey, (err, authData) => {
+            if (err) {
+                res.sendStatus(403);
+            } else {
+                let partial = false;
+                if (req.files) {
+                    req.files.forEach((f) => {
+                        const fname = path.join(uploadsDir, f.filename);
+                        const oname = path.join(uploadsDir, f.originalname);
+                        if (!fs.existsSync(oname)) {
+                            fs.unlinkSync(fname);
+                            partial = true;
+                            return;
+                        }
+                        fs.renameSync(fname, oname);
+                    });
+                }
+                res.sendStatus(partial ? 206 : 201);
+            }
+        });
+    });
+
+    // Download file
+    app.get("/api/download/:filename", verifyToken, (req, res, next) => {
+        jwt.verify(req.token, jwtSecretKey, (err, authData) => {
+            if (err) {
+                res.sendStatus(403);
+            } else {
+                const fileName = req.params["filename"];
+                const filePath = path.join(uploadsDir, fileName);
+                if (!fs.existsSync(filePath)) {
+                    res.sendStatus(404);
+                    return;
+                }
+                res.sendFile(filePath);
+            }
+        });
+    });
+
+    // Delete file
+    app.delete("/api/delete/:filename", verifyToken, (req, res, next) => {
+        jwt.verify(req.token, jwtSecretKey, (err, authData) => {
+            if (err) {
+                res.sendStatus(403);
+            } else {
+                const fileName = req.params["filename"];
+                const filePath = path.join(uploadsDir, fileName);
+                if (!fs.existsSync(filePath)) {
+                    res.sendStatus(404);
+                    return;
+                }
+                fs.unlinkSync(filePath);
+                res.sendStatus(202);
+            }
+        });
+    });
+
+    // Get file size
+    app.get("/api/size/:filename", verifyToken, (req, res, next) => {
+        jwt.verify(req.token, jwtSecretKey, (err, authData) => {
+            if (err) {
+                res.sendStatus(403);
+            } else {
+                const fileName = req.params["filename"];
+                const filePath = path.join(uploadsDir, fileName);
+                if (!fs.existsSync(filePath)) {
+                    res.sendStatus(404);
+                    return;
+                }
+                const stats = fs.statSync(filePath);
+                res.json(stats.size);
+            }
+        });
+    });
+
+    // Get whole files list
+    app.get("/api/list", verifyToken, (req, res, next) => {
+        jwt.verify(req.token, jwtSecretKey, (err, authData) => {
+            if (err) {
+                res.sendStatus(403);
+            } else {
+                const filesList = fs.readdirSync(uploadsDir);
+                res.json({ files: filesList, authData });
+            }
+        });
+    });
+
+    // Get files list with given ext
+    app.get("/api/list/ext/:ext?", verifyToken, (req, res, next) => {
+        jwt.verify(req.token, jwtSecretKey, (err, authData) => {
+            if (err) {
+                res.sendStatus(403);
+            } else {
+                const ext = req.params["ext"];
+                const filesList = fs.readdirSync(uploadsDir);
+                const filteredList = filesList.filter(x => !ext ? x : x.endsWith(ext));
+                res.json({ files : filteredList, authData });
+            }
+        });
+    });
+
+    // Get files list with given ext
+    app.get("/api/list/filter/:filter?", verifyToken, (req, res, next) => {
+        jwt.verify(req.token, jwtSecretKey, (err, authData) => {
+            if (err) {
+                res.sendStatus(403);
+            } else {
+                const filter = req.params["filter"];
+                const filesList = fs.readdirSync(uploadsDir);
+                const filteredList = filesList.filter(x => !filter ? x : x.includes(filter));
+                res.json({ files : filteredList, authData });
+            }
+        });
+    });
 
 })();

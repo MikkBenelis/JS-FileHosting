@@ -17,9 +17,12 @@
 
             <header class="mb-auto">
                 <a class="navbar-brand" href="#home">File hosting</a>
-                <nav class="nav justify-content-center nav-auth">
+                <nav class="nav justify-content-center nav-auth d-flex" id="unauthorized-nav">
                     <a class="nav-link" href="#join"><i class="fa fa-user-plus"></i> Join us</a>
-                    <a class="nav-link" href="#login"><i class="fa fa-sign-in-alt"></i> Sign in</a>
+                    <a class="nav-link" href="#signin"><i class="fa fa-sign-in-alt"></i> Sign in</a>
+                </nav>
+                <nav class="nav justify-content-center nav-auth d-none" id="authorized-nav">
+                    <a class="nav-link" onclick="logout()"><i class="fa fa-sign-out-alt"></i> Logout</a>
                 </nav>
                 <nav class="nav justify-content-center nav-menu">
                     <a class="nav-link" href="#list"><i class="fa fa-list"></i> Files list</a>
