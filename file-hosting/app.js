@@ -21,17 +21,15 @@
     // APP SETTINGS
     //////////////////////////////////////////////////
 
+    const appPort = 3000;
     const appName = "JS FILE HOSTING";
     const jwtSecretKey = "secret_key";
     const indexFile = path.join(__dirname, "app.html");
-    const publicDir = path.join(__dirname, 'public');
+    const publicDir = path.join(__dirname, "public");
     const uploadsDir = path.join(__dirname, "uploads");
 
     const app = express();
-    const appPort = 3000;
-
     app.use(express.static(publicDir));
-
     app.listen(appPort, () => {
         console.log(`[${appName}] Application started!`);
         console.log(`[${appName}] Running on ${appPort} port`);
@@ -46,7 +44,7 @@
     app.get("/api/auth", verifyToken, (req, res, next) => {
         jwt.verify(req.token, jwtSecretKey, (err, authData) => {
             if (err) {
-                res.sendStatus(403);
+                res.sendStatus(401);
             } else {
                 res.sendStatus(200);
             }
@@ -56,7 +54,6 @@
     app.post("/api/login", upload.none(), (req, res, next) => {
 
         const user = {
-            username : "mikk",
             login : "mikk",
             password : "pass"
         }
@@ -64,13 +61,13 @@
         const reqLogin = req.body["login"];
         const reqPassword = req.body["password"];
         
-        if (reqLogin === user.username && reqPassword === user.password) {
-            jwt.sign({ user : user}, jwtSecretKey, { expiresIn : '360s'}, (err, token) => {
+        if (reqLogin === user.login && reqPassword === user.password) {
+            jwt.sign({ user : user}, jwtSecretKey, { expiresIn : "360s"}, (err, token) => {
                 res.cookie("Authorization", token, { httpOnly : true });
-                res.json({ token : token });
+                res.sendStatus(200);
             });
         } else {
-            res.sendStatus(403);
+            res.sendStatus(401);
         }
 
     });
@@ -82,13 +79,14 @@
 
     function verifyToken(req, res, next) {
         const authCookieName = "Authorization";
-        const cookieIndex = authCookieName.length + 1;
-        const authHeader = req.headers["cookie"].substring(cookieIndex);
+        let cookieIndex = authCookieName.length + 1;
+        const authHeader = req.headers["cookie"];
         if (typeof(authHeader) !== "undefined") {
-            req.token = authHeader;
+            cookieIndex += authHeader.indexOf("Authorization");
+            req.token = authHeader.substring(cookieIndex);
             next();
         } else {
-            res.sendStatus(403);
+            res.sendStatus(401);
         }
     }
 
@@ -107,7 +105,7 @@
     app.post("/api/upload", upload.array("files"), verifyToken, (req, res, next) => {
         jwt.verify(req.token, jwtSecretKey, (err, authData) => {
             if (err) {
-                res.sendStatus(403);
+                res.sendStatus(401);
             } else {
                 let partial = false;
                 if (req.files) {
@@ -131,7 +129,7 @@
     app.put("/api/update", upload.array("files"), verifyToken, (req, res, next) => {
         jwt.verify(req.token, jwtSecretKey, (err, authData) => {
             if (err) {
-                res.sendStatus(403);
+                res.sendStatus(401);
             } else {
                 let partial = false;
                 if (req.files) {
@@ -155,7 +153,7 @@
     app.get("/api/download/:filename", verifyToken, (req, res, next) => {
         jwt.verify(req.token, jwtSecretKey, (err, authData) => {
             if (err) {
-                res.sendStatus(403);
+                res.sendStatus(401);
             } else {
                 const fileName = req.params["filename"];
                 const filePath = path.join(uploadsDir, fileName);
@@ -172,7 +170,7 @@
     app.delete("/api/delete/:filename", verifyToken, (req, res, next) => {
         jwt.verify(req.token, jwtSecretKey, (err, authData) => {
             if (err) {
-                res.sendStatus(403);
+                res.sendStatus(401);
             } else {
                 const fileName = req.params["filename"];
                 const filePath = path.join(uploadsDir, fileName);
@@ -190,7 +188,7 @@
     app.get("/api/size/:filename", verifyToken, (req, res, next) => {
         jwt.verify(req.token, jwtSecretKey, (err, authData) => {
             if (err) {
-                res.sendStatus(403);
+                res.sendStatus(401);
             } else {
                 const fileName = req.params["filename"];
                 const filePath = path.join(uploadsDir, fileName);
@@ -208,7 +206,7 @@
     app.get("/api/list", verifyToken, (req, res, next) => {
         jwt.verify(req.token, jwtSecretKey, (err, authData) => {
             if (err) {
-                res.sendStatus(403);
+                res.sendStatus(401);
             } else {
                 const filesList = fs.readdirSync(uploadsDir);
                 res.json({ files: filesList, authData });
@@ -220,7 +218,7 @@
     app.get("/api/list/ext/:ext?", verifyToken, (req, res, next) => {
         jwt.verify(req.token, jwtSecretKey, (err, authData) => {
             if (err) {
-                res.sendStatus(403);
+                res.sendStatus(401);
             } else {
                 const ext = req.params["ext"];
                 const filesList = fs.readdirSync(uploadsDir);
@@ -230,11 +228,11 @@
         });
     });
 
-    // Get files list with given ext
+    // Get files list with given filter
     app.get("/api/list/filter/:filter?", verifyToken, (req, res, next) => {
         jwt.verify(req.token, jwtSecretKey, (err, authData) => {
             if (err) {
-                res.sendStatus(403);
+                res.sendStatus(401);
             } else {
                 const filter = req.params["filter"];
                 const filesList = fs.readdirSync(uploadsDir);

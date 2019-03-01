@@ -32,11 +32,10 @@
             </header>
 
             <div class="mt-5 mb-5" id="app">Loading...</div>
-            <script src="scripts/app.js"></script>
 
             <footer class="mt-auto" style="color: rgba(255, 255, 255, .5)">
                 <p>File hostring, created by <a href="https://github.com/MikkBenelis">@MikkBenelis</a></p>
-                <input type="file" onchange="uploadFiles()" name="files" id="files-to-upload" hidden multiple>
+                <input type="file" name="files" id="files-to-upload" hidden multiple>
             </footer>
 
         </div>
@@ -45,6 +44,9 @@
     <script src="scripts/libs/jquery.js"></script>
     <script src="scripts/libs/bootstrap.js"></script>
     <script src="scripts/libs/fontawesome.js"></script>
+    <script src="scripts/libs/socket.io.js"></script>
+    <script src="scripts/libs/socket.io.fu.js"></script>
+    <script src="scripts/app-ws.js"></script>
 
     </body>
 </html>

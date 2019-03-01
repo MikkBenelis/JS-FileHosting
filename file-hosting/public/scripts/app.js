@@ -106,7 +106,8 @@ function uploadFiles() {
         formData.append("files", files[i]);
     xhttp.onreadystatechange = function () {
         if (this.readyState === 4) {
-            window.location.hash = (this.status === 201) ? "#list" : "#signin";
+            document.getElementById("files-to-upload").value = null;
+            window.location.hash = (this.status === 401) ? "#signin" : "#list";
         }
     };
     xhttp.open("POST", "/api/upload");
