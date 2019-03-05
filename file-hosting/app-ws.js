@@ -105,14 +105,13 @@
                         return;
                     }
                     fs.readFile(filePath, (err, data) => {
-                        socket.emit("downloadedFile", { 
-                            status: 200, 
-                            fileName: req.fileName, 
-                            file: data, 
-                            authData 
+                        socket.emit("downloadedFile", {
+                            status: 200,
+                            fileName: req.fileName,
+                            file: data,
+                            authData
                         });
                     });
-                    
                 }
             });
         });

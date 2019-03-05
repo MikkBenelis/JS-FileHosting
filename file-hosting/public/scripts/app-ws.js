@@ -94,12 +94,8 @@ function logout() {
 
 socket.on("notAuthorized", () => {
     window.location.hash = "#signin";
+    console.log(`Not authorized: 401`);
 });
-
-function uploadFiles() {
-    //uploader.listenOnSubmit();
-    //socket.emit("uploadFiles", { formData, token: localStorage.getItem("auth-token") });
-}
 
 socket.on("uploadedFiles", response => {
     console.log(`UploadedFiles: ${response.status}`);

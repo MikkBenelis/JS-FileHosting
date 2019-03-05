@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <meta charset="utf-8">
+        <title>BSUIR JS LAB</title>
+
+        <link rel="stylesheet" href="styles/bootstrap.css">
+        <link rel="stylesheet" href="styles/fontawesome.css">
+        <link rel="stylesheet" href="styles/styles.css">
+
+    </head>
+    <body>
+
+    <div class="container text-center">
+        <div class="d-flex h-100 p-3 mx-auto flex-column">
+
+            <header class="mb-auto">
+                <a class="navbar-brand" href="#home">File hosting</a>
+                <nav class="nav justify-content-center nav-auth d-flex" id="unauthorized-nav">
+                    <a class="nav-link" href="#join"><i class="fa fa-user-plus"></i> Join us</a>
+                    <a class="nav-link" href="#signin"><i class="fa fa-sign-in-alt"></i> Sign in</a>
+                </nav>
+                <nav class="nav justify-content-center nav-auth d-none" id="authorized-nav">
+                    <a class="nav-link" onclick="logout()"><i class="fa fa-sign-out-alt"></i> Logout</a>
+                </nav>
+                <nav class="nav justify-content-center nav-menu">
+                    <a class="nav-link" href="#list"><i class="fa fa-list"></i> Files list</a>
+                    <a class="nav-link" href="#upload"><i class="fa fa-upload"></i > Upload</a>
+                    <a class="nav-link" href="#about"><i class="fa fa-info"></i> About</a>
+                </nav>
+            </header>
+
+            <div class="mt-5 mb-5" id="app">Loading...</div>
+            <script src="scripts/app-gql.js"></script>
+
+            <footer class="mt-auto" style="color: rgba(255, 255, 255, .5)">
+                <p>File hostring, created by <a href="https://github.com/MikkBenelis">@MikkBenelis</a></p>
+                <input type="file" onchange="uploadFiles()" name="files" id="files-to-upload" hidden multiple>
+            </footer>
+
+        </div>
+    </div>
+
+    <script src="scripts/libs/jquery.js"></script>
+    <script src="scripts/libs/bootstrap.js"></script>
+    <script src="scripts/libs/fontawesome.js"></script>
+
+    </body>
+</html>

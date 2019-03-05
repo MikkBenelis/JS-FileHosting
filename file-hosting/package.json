@@ -4,12 +4,16 @@
 	"description": "file hosting",
 	"scripts": {
 		"app": "nodemon app.js",
-		"app-ws": "nodemon app-ws.js"
+		"app-ws": "nodemon app-ws.js",
+		"app-gql": "nodemon app-gql.js"
 	},
 	"author": "mikk",
 	"dependencies": {
+		"body-parser": "^1.18.3",
 		"express": "^4.16.4",
+		"express-graphql": "^0.7.1",
 		"fs": "0.0.1-security",
+		"graphql": "^14.1.1",
 		"jsonwebtoken": "^8.4.0",
 		"multer": "^1.4.1",
 		"nodemon": "^1.18.10",

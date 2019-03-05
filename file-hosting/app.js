@@ -62,7 +62,7 @@
         const reqPassword = req.body["password"];
         
         if (reqLogin === user.login && reqPassword === user.password) {
-            jwt.sign({ user : user}, jwtSecretKey, { expiresIn : "360s"}, (err, token) => {
+            jwt.sign({ user }, jwtSecretKey, { expiresIn : "360s"}, (err, token) => {
                 res.cookie("Authorization", token, { httpOnly : true });
                 res.sendStatus(200);
             });
@@ -78,16 +78,21 @@
     });
 
     function verifyToken(req, res, next) {
-        const authCookieName = "Authorization";
-        let cookieIndex = authCookieName.length + 1;
-        const authHeader = req.headers["cookie"];
-        if (typeof(authHeader) !== "undefined") {
-            cookieIndex += authHeader.indexOf("Authorization");
-            req.token = authHeader.substring(cookieIndex);
-            next();
-        } else {
-            res.sendStatus(401);
+        const cookies = req.headers["cookie"];
+        if (typeof(cookies) !== "undefined") {
+            const authCookieNameLength = "Authorization".length;
+            const authIndex = cookies.indexOf("Authorization");
+            if (authIndex !== -1) {
+                let cookieIndex = cookies.indexOf("Authorization");
+                cookieIndex += authCookieNameLength + 1;
+                const indexOfNextCookie = cookies.indexOf(";", cookieIndex);
+                const authCookieEnd = indexOfNextCookie !== -1 ? indexOfNextCookie : cookies.length;
+                req.token = cookies.substring(cookieIndex, authCookieEnd);
+                next();
+                return;
+            }
         }
+        res.sendStatus(401);
     }
 
 
